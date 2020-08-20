@@ -1,0 +1,25 @@
+o que a aplicacao usa 
+
+postgress para banco de dados 
+express para api
+sendgrid para enviar emails
+api do expo para envio de notificaçoes
+api do stripe para fazer pagamentos 
+
+
+se eu armazenar o token do push notification na 
+tabela de usuarios eu posso  
+
+push passo a passs
+
+1 pedir permissao para o usuario para deixar enviar notification
+
+2 quando o user aceitar gerar um token para esse usuario e armazenar no banco de dados
+armazenar o token do push no async storage do usuario para nao ficar pedindo 
+autorização toda ora 
+
+3 quando quero enviar a notificacao para o usuario devo pegar meu backend e enviar para o backend do expo 
+para ele enviar a notificacao para o usuario
+
+
+devo apartir do meu backend enviar para o back do expo  um post com a menssagem  da notificacao

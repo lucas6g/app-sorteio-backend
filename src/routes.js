@@ -4,8 +4,11 @@ const router = express.Router()
 const UserController = require('./controller/UserController')
 
 
+
+
+
 //register user
-router.post('/signup',UserController.signup)
+router.post('/sinup',UserController.signup)
 
 
 
