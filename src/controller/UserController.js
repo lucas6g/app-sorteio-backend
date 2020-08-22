@@ -1,6 +1,7 @@
 const knex = require("../database/connection");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+require("dotenv").config();
 
 function comparePassword(candidatePassword, userPassword) {
     return new Promise((resolve, reject) => {
@@ -19,20 +20,14 @@ function comparePassword(candidatePassword, userPassword) {
 
 module.exports = {
     async signup(req, res) {
-        const {
-            user_name,
-            email,
-            password,
-            confirmation_token,
-            push_token,
-        } = req.body;
+        const { user_name, email, password, push_token } = req.body;
 
         const user = {
             user_name,
             email,
             password,
-            confirmation_token,
             push_token,
+            confirmation_token: Math.floor(100000 + Math.random() * 900000),
         };
 
         const userNameExists = await knex("user")
@@ -60,11 +55,13 @@ module.exports = {
         const salt = await bcrypt.genSalt(saltLevel);
         const hashPassword = await bcrypt.hash(user.password, salt);
         user.password = hashPassword;
+        /*
+            send token  to user email 
+        */
 
         const idsArray = await knex("user").insert(user).returning("user_id");
         const userId = idsArray[0];
-
-        const token = jwt.sign({ userId }, "MY_SECRET_KEY");
+        const token = jwt.sign({ userId }, process.env.JWT_KEY);
 
         if (token) {
             return res.status(201).json({ token });
@@ -92,11 +89,25 @@ module.exports = {
             //criando o token de novo com a informacao do usuario
             const token = jwt.sign(
                 { userId: user[0].user_id },
-                "MY_SECRET_KEY"
+                process.env.JWT_KEY
             );
             return res.status(200).json({ token });
         } catch (error) {
             return res.status(422).json({ erro: "invalid email or password" });
         }
+    },
+
+    async acountConfirmation(req, res) {
+        const { confirmation_token } = req.body;
+
+        if (!confirmation_token) {
+            return res.status(422).json({ error: "invalid token" });
+        }
+
+        const user = await knex("user")
+            .select("*")
+            .where("user.confirmation_token", "=", confirmation_token);
+
+        console.log(user[0]);
     },
 };
