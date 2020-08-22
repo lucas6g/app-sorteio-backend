@@ -1,16 +1,15 @@
-const express = require('express')
-const knex = require('./database/connection')
-const router = express.Router()
-const UserController = require('./controller/UserController')
+const express = require("express");
 
-
-
-
+const router = express.Router();
+const UserController = require("./controller/UserController");
+const requireAuth = require("./middlewares/requireAuth");
 
 //register user
-router.post('/sinup',UserController.signup)
+router.post("/signup", UserController.signup);
+router.post("/signin", UserController.signin);
 
+router.get("/token", requireAuth, (req, res) => {
+    return res.status(200).json({ email: req.user.email });
+});
 
-
-
-module.exports = router
+module.exports = router;
