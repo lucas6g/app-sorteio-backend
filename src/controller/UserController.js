@@ -1,7 +1,10 @@
 const knex = require("../database/connection");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const sgMail = require("@sendgrid/mail");
 require("dotenv").config();
+
+sgMail.setApiKey(process.env.SAND_GRID_API_KEY);
 
 function comparePassword(candidatePassword, userPassword) {
     return new Promise((resolve, reject) => {
@@ -10,12 +13,24 @@ function comparePassword(candidatePassword, userPassword) {
                 return reject(err);
             }
             if (!isMatch) {
-                //nao e a senha
+                //not is the password
                 return reject(false);
             }
             resolve(true);
         });
     });
+}
+
+async function sendTokenConfirmationAcount(email, token) {
+    sgMail.setApiKey(process.env.SAND_GRID_API_KEY);
+    const msg = {
+        to: email,
+        from: process.env.SAND_GRID_EMAIL,
+        subject: "Comfirmação da conta",
+        text: `Seu codigo de confirmação é `,
+        html: `<strong> ${token} </strong>`,
+    };
+    await sgMail.send(msg);
 }
 
 module.exports = {
@@ -38,10 +53,10 @@ module.exports = {
             .select("*")
             .where("email", "=", email);
         if (userNameExists.length !== 0) {
-            return res.status(401).json({ error: "Esse usuario ja existe" });
+            return res.status(401).json({ error: "user name already exists" });
         }
         if (emailExists.length !== 0) {
-            return res.status(401).json({ error: "Esse email ja esta em uso" });
+            return res.status(401).json({ error: "this email already exists" });
         }
 
         if (!email || !password) {
@@ -60,6 +75,9 @@ module.exports = {
         */
 
         const idsArray = await knex("user").insert(user).returning("user_id");
+
+        sendTokenConfirmationAcount(user.email, user.confirmation_token);
+
         const userId = idsArray[0];
         const token = jwt.sign({ userId }, process.env.JWT_KEY);
 
@@ -86,7 +104,7 @@ module.exports = {
         }
         try {
             await comparePassword(password, user[0].password);
-            //criando o token de novo com a informacao do usuario
+            //creating a token whit the user information
             const token = jwt.sign(
                 { userId: user[0].user_id },
                 process.env.JWT_KEY
@@ -108,6 +126,12 @@ module.exports = {
             .select("*")
             .where("user.confirmation_token", "=", confirmation_token);
 
-        console.log(user[0]);
+        if (user[0]) {
+            await knex("user")
+                .update("is_verified", true)
+                .where("user.confirmation_token", "=", confirmation_token);
+        }
+
+        return res.status(200).json({ is_verified: true });
     },
 };

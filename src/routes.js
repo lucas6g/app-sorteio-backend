@@ -9,6 +9,7 @@ router.post("/signup", UserController.signup);
 router.post("/signin", UserController.signin);
 router.post("/confirmation", UserController.acountConfirmation);
 
+//rota de teste do token
 router.get("/token", requireAuth, (req, res) => {
     return res.status(200).json({ email: req.user.email });
 });

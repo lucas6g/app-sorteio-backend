@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const knex = require("../database/connection");
 
 //midleware que serve para dar acesso as rotas da minha aplicacao
-//aos usurios que tiverem token
+//somente aos usurios que tiverem token
 
 module.exports = function (req, res, next) {
     const { authorization } = req.headers;

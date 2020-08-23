@@ -23,3 +23,10 @@ para ele enviar a notificacao para o usuario
 
 
 devo apartir do meu backend enviar para o back do expo  um post com a menssagem  da notificacao
+
+
+nome: dream draw
+email:dreamdraw.app.service@gmail.com
+senha:creative@2020
+
+
