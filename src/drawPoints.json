@@ -1,0 +1,16 @@
+{
+    "drowPoints": [
+        {
+            "drow_id": 1,
+            "price": 300
+        },
+        {
+            "drow_id": 2,
+            "price": 600
+        },
+        {
+            "drow_id": 3,
+            "price": 900
+        }
+    ]
+}

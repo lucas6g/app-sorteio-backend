@@ -1,10 +1,12 @@
 const express = require("express");
 
-const router = require("./routes");
+const authRoute = require("./routes/authRoute");
+const paymentRoute = require("./routes/paymentRoute");
 const app = express();
 
 app.use(express.json());
-app.use(router);
+app.use(authRoute);
+app.use(storeRoute);
 
 app.listen(3333, () => {
     console.log("servidor rodando na port 3333");

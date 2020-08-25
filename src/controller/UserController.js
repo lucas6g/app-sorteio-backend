@@ -4,8 +4,6 @@ const bcrypt = require("bcrypt");
 const sgMail = require("@sendgrid/mail");
 require("dotenv").config();
 
-sgMail.setApiKey(process.env.SAND_GRID_API_KEY);
-
 function comparePassword(candidatePassword, userPassword) {
     return new Promise((resolve, reject) => {
         bcrypt.compare(candidatePassword, userPassword, (err, isMatch) => {
@@ -21,7 +19,7 @@ function comparePassword(candidatePassword, userPassword) {
     });
 }
 
-async function sendTokenConfirmationAcount(email, token) {
+async function sendTokenConfirmation(email, token) {
     sgMail.setApiKey(process.env.SAND_GRID_API_KEY);
     const msg = {
         to: email,
@@ -76,7 +74,7 @@ module.exports = {
 
         const idsArray = await knex("user").insert(user).returning("user_id");
 
-        sendTokenConfirmationAcount(user.email, user.confirmation_token);
+        sendTokenConfirmation(user.email, user.confirmation_token);
 
         const userId = idsArray[0];
         const token = jwt.sign({ userId }, process.env.JWT_KEY);
