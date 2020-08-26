@@ -8,10 +8,17 @@ exports.up = function (knex) {
         table.string("email").notNullable();
         table.string("password").notNullable();
         table.integer("draw_points").defaultTo(100);
-        table.string("whatsapp");
-        table.string("img_profile");
-        table.boolean("is_verified").notNullable().defaultTo(false);
+        table.string("whatsapp").nullable();
+        table.string("img_profile").nullable();
+        //confirmate acount
         table.integer("confirmation_token").notNullable();
+        table.datetime("confirmation_token_expires").notNullable();
+        table.boolean("is_verified").notNullable().defaultTo(false);
+
+        //reset password
+        table.integer("reset_password_token").nullable();
+        table.datetime("reset_password_token_expires").nullable();
+
         table.string("push_token").notNullable();
         table.timestamp("created_at").defaultTo(knex.fn.now());
         table.timestamp("updated_at").defaultTo(knex.fn.now());

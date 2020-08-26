@@ -1,7 +1,8 @@
 const knex = require("../database/connection");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const sgMail = require("@sendgrid/mail");
+const generateToken = require("../utils/generateToken");
+const sendTokenConfirmation = require("../utils/sendTokenConfirmation");
 require("dotenv").config();
 
 function comparePassword(candidatePassword, userPassword) {
@@ -19,18 +20,6 @@ function comparePassword(candidatePassword, userPassword) {
     });
 }
 
-async function sendTokenConfirmation(email, token) {
-    sgMail.setApiKey(process.env.SAND_GRID_API_KEY);
-    const msg = {
-        to: email,
-        from: process.env.SAND_GRID_EMAIL,
-        subject: "Comfirmação da conta",
-        text: `Seu codigo de confirmação é `,
-        html: `<strong> ${token} </strong>`,
-    };
-    await sgMail.send(msg);
-}
-
 module.exports = {
     async signup(req, res) {
         const { user_name, email, password, push_token } = req.body;
@@ -40,15 +29,15 @@ module.exports = {
             email,
             password,
             push_token,
-            confirmation_token: Math.floor(100000 + Math.random() * 900000),
+            confirmation_token: generateToken(),
         };
 
         const userNameExists = await knex("user")
-            .select("*")
+            .select("user_name")
             .where("user_name", "=", user_name);
 
         const emailExists = await knex("user")
-            .select("*")
+            .select("email")
             .where("email", "=", email);
         if (userNameExists.length !== 0) {
             return res.status(401).json({ error: "user name already exists" });
@@ -71,16 +60,24 @@ module.exports = {
         /*
             send token  to user email 
         */
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 1);
+        user.confirmation_token_expires = now;
 
         const idsArray = await knex("user").insert(user).returning("user_id");
+        const userId = idsArray[0];
 
         sendTokenConfirmation(user.email, user.confirmation_token);
+        const insertedUser = await knex("user")
+            .select("email")
+            .where("user.user_id", "=", idsArray[0]);
 
-        const userId = idsArray[0];
+        const emailInserted = insertedUser[0].email;
+
         const token = jwt.sign({ userId }, process.env.JWT_KEY);
 
         if (token) {
-            return res.status(201).json({ token });
+            return res.status(201).json({ token, emailInserted });
         }
     },
 
@@ -114,22 +111,61 @@ module.exports = {
     },
 
     async acountConfirmation(req, res) {
-        const { confirmation_token } = req.body;
+        const { email, confirmation_token } = req.body;
 
         if (!confirmation_token) {
             return res.status(422).json({ error: "invalid token" });
         }
 
         const user = await knex("user")
-            .select("*")
-            .where("user.confirmation_token", "=", confirmation_token);
+            .select("confirmation_token", "confirmation_token_expires")
+            .where("user.email", "=", email);
 
-        if (user[0]) {
-            await knex("user")
-                .update("is_verified", true)
-                .where("user.confirmation_token", "=", confirmation_token);
+        if (!user[0]) {
+            return res.status(404).json({ error: "user not found" });
+        }
+        if (user[0].confirmation_token !== confirmation_token) {
+            return res.status(422).json({ error: "invalid token" });
         }
 
+        const now = new Date();
+
+        if (now > user[0].confirmation_token_expires) {
+            return res
+                .status(400)
+                .json({ error: "token expired generate new one" });
+        }
+
+        await knex("user")
+            .update("is_verified", true)
+            .where("user.confirmation_token", "=", confirmation_token);
+
         return res.status(200).json({ is_verified: true });
+    },
+
+    async reSendConfirmationToken(req, res) {
+        const { email } = req.body;
+
+        const user = await knex("user")
+            .select()
+            .where("user.email", "=", email);
+
+        if (!user[0]) {
+            return res.status(404).json({ error: "user not found" });
+        } else {
+            const token = generateToken();
+            const now = new Date();
+            now.setMinutes(now.getMinutes + 1);
+            await knex("user")
+                .update(
+                    "confirmation_token",
+                    token,
+                    "confirmation_token_expires",
+                    now
+                )
+                .where("user.email", "=", email);
+            sendTokenConfirmation(email, token);
+            return res.send();
+        }
     },
 };

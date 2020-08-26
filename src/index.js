@@ -6,7 +6,6 @@ const app = express();
 
 app.use(express.json());
 app.use(authRoute);
-app.use(storeRoute);
 
 app.listen(3333, () => {
     console.log("servidor rodando na port 3333");
