@@ -11,5 +11,7 @@ router.post(
     "/resend_confirmation_token",
     UserController.reSendConfirmationToken
 );
+router.post("/forgot_password", UserController.forgotPassword);
+router.put("/reset_password", UserController.resetPassword);
 
 module.exports = router;

@@ -3,22 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const generateToken = require("../utils/generateToken");
 const sendTokenConfirmation = require("../utils/sendTokenConfirmation");
+const hashData = require("../utils/hashData");
 require("dotenv").config();
-
-function comparePassword(candidatePassword, userPassword) {
-    return new Promise((resolve, reject) => {
-        bcrypt.compare(candidatePassword, userPassword, (err, isMatch) => {
-            if (err) {
-                return reject(err);
-            }
-            if (!isMatch) {
-                //not is the password
-                return reject(false);
-            }
-            resolve(true);
-        });
-    });
-}
 
 module.exports = {
     async signup(req, res) {
@@ -53,15 +39,13 @@ module.exports = {
         }
 
         //hash password
-        const saltLevel = 10;
-        const salt = await bcrypt.genSalt(saltLevel);
-        const hashPassword = await bcrypt.hash(user.password, salt);
-        user.password = hashPassword;
+        user.password = await hashData(user.password);
+
         /*
             send token  to user email 
         */
         const now = new Date();
-        now.setMinutes(now.getMinutes() + 1);
+        now.setMinutes(now.getMinutes() + 5);
         user.confirmation_token_expires = now;
 
         const idsArray = await knex("user").insert(user).returning("user_id");
@@ -96,6 +80,12 @@ module.exports = {
 
         if (!user[0]) {
             return res.status(422).json({ erro: "invalid email or password" });
+        }
+
+        if (!user[0].is_verified) {
+            return res
+                .status(422)
+                .json({ erro: "account without verification" });
         }
         try {
             await comparePassword(password, user[0].password);
@@ -154,18 +144,94 @@ module.exports = {
             return res.status(404).json({ error: "user not found" });
         } else {
             const token = generateToken();
+
             const now = new Date();
-            now.setMinutes(now.getMinutes + 1);
+            now.setMinutes(now.getMinutes() + 5);
+
             await knex("user")
-                .update(
-                    "confirmation_token",
-                    token,
-                    "confirmation_token_expires",
-                    now
-                )
+                .update({
+                    confirmation_token: token,
+                    confirmation_token_expires: now,
+                })
                 .where("user.email", "=", email);
             sendTokenConfirmation(email, token);
             return res.send();
         }
     },
+    async forgotPassword(req, res) {
+        const { email } = req.body;
+
+        try {
+            const user = await knex("user")
+                .select("email")
+                .where("user.email", "=", email);
+
+            if (!user[0]) {
+                return res.status(404).json({ error: "user not found" });
+            } else {
+                const token = generateToken();
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + 5);
+                await knex("user")
+                    .update({
+                        reset_password_token: token,
+                        reset_password_token_expires: now,
+                    })
+                    .where("user.email", "=", email);
+                sendTokenConfirmation(email, token);
+                return res.send();
+            }
+        } catch (error) {
+            res.status(400).json({ error: "reset password fail" });
+        }
+    },
+
+    async resetPassword(req, res) {
+        const { token, email, password } = req.body;
+
+        try {
+            const user = await knex("user")
+                .select("reset_password_token", "reset_password_token_expires")
+                .where("user.email", "=", email);
+
+            if (!user[0]) {
+                return res.status(404).json({ error: "user not found" });
+            }
+            if (token !== user[0].reset_password_token) {
+                return res.status(400).json({ error: "invalid token" });
+            }
+
+            const now = new Date();
+
+            if (now > user[0].confirmation_token_expires) {
+                return res
+                    .status(400)
+                    .json({ error: "token expired generate new one" });
+            }
+            await knex("user")
+                .update({
+                    password: await hashData(password),
+                })
+                .where("user.email", "=", email);
+            return res.status(200).json({ message: "password updated" });
+        } catch (error) {
+            return res
+                .status(400)
+                .json({ error: "canot reset password tray agoin" });
+        }
+    },
 };
+function comparePassword(candidatePassword, userPassword) {
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(candidatePassword, userPassword, (err, isMatch) => {
+            if (err) {
+                return reject(err);
+            }
+            if (!isMatch) {
+                //not is the password
+                return reject(false);
+            }
+            resolve(true);
+        });
+    });
+}
