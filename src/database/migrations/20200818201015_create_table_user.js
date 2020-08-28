@@ -16,7 +16,7 @@ exports.up = function (knex) {
         table.boolean("is_verified").notNullable().defaultTo(false);
 
         //reset password
-        table.integer("reset_password_token").nullable();
+        table.string("reset_password_token").nullable();
         table.datetime("reset_password_token_expires").nullable();
 
         table.string("push_token").notNullable();

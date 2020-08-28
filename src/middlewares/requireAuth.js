@@ -8,13 +8,13 @@ module.exports = function (req, res, next) {
     const { authorization } = req.headers;
 
     if (!authorization) {
-        return res.status(401).json({ error: "voce deve estar authenticado" });
+        return res.status(401).json({ error: "you must be login" });
     }
 
     const token = authorization.replace("Bearer ", "");
     jwt.verify(token, "MY_SECRET_KEY", async function (error, payload) {
         if (error) {
-            return res.status(401).json({ error: "You mos be login" });
+            return res.status(401).json({ error: "You most be login" });
         }
         //obejeto payload armazena a informacao que o jwt esta criptografando
         const { userId } = payload;

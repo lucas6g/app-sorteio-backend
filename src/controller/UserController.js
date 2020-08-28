@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const generateToken = require("../utils/generateToken");
 const sendTokenConfirmation = require("../utils/sendTokenConfirmation");
+const generateTokenResetPassword = require("../utils/generateTokenResetPassword");
+const sendResetPasswordToken = require("../utils/sendResetPasswordToken");
 const hashData = require("../utils/hashData");
 require("dotenv").config();
 
@@ -158,6 +160,9 @@ module.exports = {
             return res.send();
         }
     },
+
+    //reset passwords ------------
+
     async forgotPassword(req, res) {
         const { email } = req.body;
 
@@ -169,7 +174,7 @@ module.exports = {
             if (!user[0]) {
                 return res.status(404).json({ error: "user not found" });
             } else {
-                const token = generateToken();
+                const token = generateTokenResetPassword();
                 const now = new Date();
                 now.setMinutes(now.getMinutes() + 5);
                 await knex("user")
@@ -178,16 +183,17 @@ module.exports = {
                         reset_password_token_expires: now,
                     })
                     .where("user.email", "=", email);
-                sendTokenConfirmation(email, token);
+                sendResetPasswordToken(email, token);
                 return res.send();
             }
         } catch (error) {
+            console.log(error);
             res.status(400).json({ error: "reset password fail" });
         }
     },
 
     async resetPassword(req, res) {
-        const { token, email, password } = req.body;
+        const { email, password, token } = req.body;
 
         try {
             const user = await knex("user")
@@ -217,7 +223,33 @@ module.exports = {
         } catch (error) {
             return res
                 .status(400)
-                .json({ error: "canot reset password tray agoin" });
+                .json({ error: "canot reset password tray again" });
+        }
+    },
+
+    async reSendResetPasswordToken(req, res) {
+        const { email } = req.body;
+
+        const user = await knex("user")
+            .select("email")
+            .where("user.email", "=", email);
+
+        if (!user[0]) {
+            return res.status(404).json({ error: "user not found" });
+        } else {
+            const token = generateTokenResetPassword();
+
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 5);
+
+            await knex("user")
+                .update({
+                    reset_password_token: token,
+                    reset_password_token_expires: now,
+                })
+                .where("user.email", "=", email);
+            sendResetPasswordToken(email, token);
+            return res.send();
         }
     },
 };
