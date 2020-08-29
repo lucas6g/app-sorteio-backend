@@ -130,7 +130,7 @@ module.exports = {
 
         await knex("user")
             .update("is_verified", true)
-            .where("user.confirmation_token", "=", confirmation_token);
+            .where("user.email", "=", email);
 
         return res.status(200).json({ is_verified: true });
     },
@@ -176,7 +176,7 @@ module.exports = {
             } else {
                 const token = generateTokenResetPassword();
                 const now = new Date();
-                now.setMinutes(now.getMinutes() + 5);
+                now.setMinutes(now.getMinutes() + 1);
                 await knex("user")
                     .update({
                         reset_password_token: token,
@@ -203,13 +203,13 @@ module.exports = {
             if (!user[0]) {
                 return res.status(404).json({ error: "user not found" });
             }
-            if (token !== user[0].reset_password_token) {
+            if (token !== user[0].reset_password_token || !token) {
                 return res.status(400).json({ error: "invalid token" });
             }
 
             const now = new Date();
 
-            if (now > user[0].confirmation_token_expires) {
+            if (now > user[0].reset_password_token_expires) {
                 return res
                     .status(400)
                     .json({ error: "token expired generate new one" });
@@ -223,35 +223,11 @@ module.exports = {
         } catch (error) {
             return res
                 .status(400)
-                .json({ error: "canot reset password tray again" });
+                .json({ error: "can not reset password tray again" });
         }
     },
 
-    async reSendResetPasswordToken(req, res) {
-        const { email } = req.body;
-
-        const user = await knex("user")
-            .select("email")
-            .where("user.email", "=", email);
-
-        if (!user[0]) {
-            return res.status(404).json({ error: "user not found" });
-        } else {
-            const token = generateTokenResetPassword();
-
-            const now = new Date();
-            now.setMinutes(now.getMinutes() + 5);
-
-            await knex("user")
-                .update({
-                    reset_password_token: token,
-                    reset_password_token_expires: now,
-                })
-                .where("user.email", "=", email);
-            sendResetPasswordToken(email, token);
-            return res.send();
-        }
-    },
+   
 };
 function comparePassword(candidatePassword, userPassword) {
     return new Promise((resolve, reject) => {
