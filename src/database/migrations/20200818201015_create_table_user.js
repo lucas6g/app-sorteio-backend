@@ -7,13 +7,14 @@ exports.up = function (knex) {
         table.string("user_name").notNullable();
         table.string("email").notNullable();
         table.string("password").notNullable();
-        table.integer("draw_points").defaultTo(100);
+
         table.string("whatsapp").nullable();
         table.string("img_profile").nullable();
         //confirmate acount
         table.integer("confirmation_token").notNullable();
         table.datetime("confirmation_token_expires").notNullable();
         table.boolean("is_verified").notNullable().defaultTo(false);
+        table.integer("draw_number").nullable();
 
         //reset password
         table.string("reset_password_token").nullable();

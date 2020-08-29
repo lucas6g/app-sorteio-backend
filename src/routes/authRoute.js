@@ -11,10 +11,6 @@ router.post(
     UserController.reSendConfirmationToken
 );
 router.post("/forgot_password", UserController.forgotPassword);
-router.post(
-    "/resend_reset_password_token",
-    UserController.reSendResetPasswordToken
-);
 
 router.put("/reset_password", UserController.resetPassword);
 
