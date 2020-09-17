@@ -1,0 +1,11 @@
+configurando sequelize
+
+--instalar o sequelize 
+--instalar o pg
+--sequelize-cli -D :para migrations e criação de tabelas
+--yarn sequelize init:para criar as pastas de configurarsação do sequelize cli
+--criar um arquivo .sequelizerc para configurar as pastas de configuração dentro do src 
+--criar arquivo database.js dentro da pasta config para configurar a conexao com banco de dados
+--yarn sequelize migration:create --name=create_table_users :comando para executar a primeira migration cria o arquivo da migration
+--yarn sequelize db:migrate: comando para executar a ultima migration no banco de dados 
+--criar uma nova migration no ambiente de producao nao dar rollback adicionar o novo recurso

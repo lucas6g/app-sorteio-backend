@@ -1,0 +1,6 @@
+//arquivo responsavel pela localização das pastas do sequelize
+module.exports = {
+  config: './src/config/database.js',
+  'models-path': './src/models',
+  'migrations-path': './src/database/migrations',
+}

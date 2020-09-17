@@ -1,11 +1,7 @@
 exports.up = function (knex) {
     return knex.schema.createTable("draw", function (table) {
         table.increments("cod_draw").primary();
-        table
-            .integer("user_id")
-            .references("user.user_id")
-            .notNullable()
-            .onDelete("CASCADE");
+        table.integer("user_id");
 
         table.integer("num_participants");
         table.datetime("draw_date").notNullable();
