@@ -15,7 +15,6 @@ class User extends Model {
         is_verified: DataTypes.BOOLEAN,
         confirmation_token: DataTypes.INTEGER,
         confirmation_token_expires: DataTypes.DATE,
-        draw_points: DataTypes.INTEGER,
         token_winner_user: DataTypes.STRING,
         reset_password_token: DataTypes.STRING,
         reset_password_token_expires: DataTypes.DATE,

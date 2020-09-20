@@ -7,6 +7,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
+        allowNull: false,
       },
       user_name: {
         type: Sequelize.STRING,
@@ -47,15 +48,9 @@ module.exports = {
         allowNull: false,
       },
 
-      draw_points: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 200,
-      },
       token_winner_user: {
         type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: 200,
+        allowNull: true,
       },
       reset_password_token: {
         type: Sequelize.STRING,
