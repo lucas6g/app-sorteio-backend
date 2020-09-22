@@ -15,7 +15,7 @@ module.exports = {
     if (!email || !password || !user_name)
       return res
         .status(401)
-        .json({ error: 'Os campos email e senha são obrigatorios' })
+        .json({ error: 'The email and password fields are mandatory' })
 
     if (password !== confirm_password)
       return res.status(400).json({ error: 'invalid confirm password' })
@@ -29,12 +29,9 @@ module.exports = {
     const user = {
       user_name,
       email,
-      password,
+      password: await hashData(password), //hash password
       confirmation_token: generateToken(),
     }
-
-    //hash password
-    user.password = await hashData(user.password)
 
     /*
              send confirmation token  to user email

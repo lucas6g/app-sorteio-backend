@@ -48,8 +48,12 @@ module.exports = {
         allowNull: false,
       },
 
-      token_winner_user: {
+      token_winning_participant: {
         type: Sequelize.STRING,
+        allowNull: true,
+      },
+      token_winning_participant_expires: {
+        type: Sequelize.DATE,
         allowNull: true,
       },
       reset_password_token: {
