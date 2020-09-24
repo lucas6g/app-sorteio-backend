@@ -2,14 +2,19 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('raffles', {
+    await queryInterface.createTable('sortitions', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
-      raffle_date: {
+      title: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+
+      sortition_date: {
         type: Sequelize.DATE,
         allowNull: false,
       },
@@ -53,6 +58,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('raffles')
+    await queryInterface.dropTable('sortitions')
   },
 }

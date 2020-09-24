@@ -44,10 +44,15 @@ module.exports = {
 
     sendConfirmationToken(insertedUser.email, insertedUser.confirmation_token)
 
-    const token = jwt.sign({ userId: insertedUser.id }, process.env.JWT_KEY)
+    const token = jwt.sign(
+      { userId: insertedUser.id },
+      process.env.JWT_SECRET_KEY
+    )
 
     if (token) {
-      return res.status(201).json({ token, email: insertedUser.email })
+      return res
+        .status(201)
+        .json({ token, email: insertedUser.email, user_id: insertedUser.id })
     }
   },
 
@@ -113,7 +118,7 @@ module.exports = {
 
       //creating a token whit the user information
       const token = jwt.sign({ userId: user.id }, process.env.JWT_KEY)
-      return res.status(200).json({ token })
+      return res.status(200).json({ token, user_id: user.id })
     } catch (error) {
       return res.status(422).json({ erro: 'invalid email or password' })
     }

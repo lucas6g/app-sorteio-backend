@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const authRoute = require('./routes/authRoute')
-const raffleRoute = require('./routes/raffleRoute')
+const sortitionRoute = require('./routes/sortitionRoute')
 const routes = require('./routes')
 const app = express()
 
@@ -13,7 +13,7 @@ app.use(express.json())
 //para usar as rotas basta passar o midleware
 app.use(authRoute)
 app.use(routes)
-app.use(raffleRoute)
+app.use(sortitionRoute)
 
 app.listen(3333, () => {
   console.log('servidor rodando na port 3333')

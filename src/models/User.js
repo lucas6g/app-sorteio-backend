@@ -7,6 +7,7 @@ class User extends Model {
     super.init(
       {
         //passar os dados da tabela para o model referenciar
+
         user_name: DataTypes.STRING,
         email: DataTypes.STRING,
         password: DataTypes.STRING,
@@ -24,6 +25,9 @@ class User extends Model {
         sequelize: connection, //passar a conexao com o banco de dados
       }
     )
+  }
+  static associate(models) {
+    this.hasMany(models.Sortition, { foreignKey: 'user_id', as: 'raffles' })
   }
 }
 
