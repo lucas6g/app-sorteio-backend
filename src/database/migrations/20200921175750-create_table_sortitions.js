@@ -45,6 +45,14 @@ module.exports = {
         allowNull: true,
         defaultValue: 0,
       },
+      award_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      award_img: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
 
       created_at: {
         type: Sequelize.DATE,

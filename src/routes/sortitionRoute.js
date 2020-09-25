@@ -6,12 +6,12 @@ const router = Router()
 
 //create a new sortition
 router.post('/sortition', requireAuth, async (req, res) => {
-  const { sortition_date, title, rules } = req.body
+  const { sortition_date, title, rules, award_name, award_img } = req.body
 
   const user = await User.findByPk(req.userId)
 
   if (!user) {
-    return res.status(400).json({ error: 'user not exists' })
+    return res.status(400).json({ error: 'you must be login' })
   }
 
   const sortition = await Sortition.create({
@@ -19,11 +19,14 @@ router.post('/sortition', requireAuth, async (req, res) => {
     rules,
     user_id: user.id,
     title,
+    award_img,
+    award_name,
   })
+
   return res.status(201).json(sortition)
 })
 
-//listar sorteio especifico
+//list especifc sortition
 router.get('/sortition', requireAuth, async (req, res) => {
   const { userId } = req
 

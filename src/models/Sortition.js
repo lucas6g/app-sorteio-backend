@@ -13,6 +13,8 @@ class Sortition extends Model {
         is_valid: DataTypes.BOOLEAN,
         user_name_winning_participant: DataTypes.STRING,
         number_participants: DataTypes.INTEGER,
+        award_name: DataTypes.STRING,
+        award_img: DataTypes.STRING,
       },
       {
         sequelize: connection, //passar a conexao com o banco de dados
@@ -21,7 +23,12 @@ class Sortition extends Model {
   }
   static associate(models) {
     //devo dar um nome para cada relacionamento
-    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'users' }) //passar a chave estrangeira da tabela de sorteio
+    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'creator' }) //passar a chave estrangeira da tabela de sorteio
+    this.belongsToMany(models.User, {
+      foreignKey: 'sortition_id',
+      through: 'users_sortitions',
+      as: 'participants',
+    })
   }
 }
 

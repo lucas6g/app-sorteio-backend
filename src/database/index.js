@@ -12,7 +12,7 @@ Sortition.init(conection)
 
 //associando os modals
 //criar associação simultanea
-Sortition.associate(conection.models)
 User.associate(conection.models)
+Sortition.associate(conection.models)
 
 module.exports = conection
