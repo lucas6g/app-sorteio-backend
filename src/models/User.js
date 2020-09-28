@@ -27,13 +27,11 @@ class User extends Model {
     )
   }
   static associate(models) {
-    this.hasMany(models.Sortition, { foreignKey: 'user_id', as: 'sortitions' })
+    this.hasMany(models.Sortition, { as: 'sortitions', foreignKey: 'user_id' })
     //always use belongsToMany to n:n
     //quais são os sorteios que esse usuario esta participando
     this.belongsToMany(models.Sortition, {
-      foreignKey: 'user_id',
-      through: 'users_sortition',
-      as: 'participating',
+      through: 'users_sortitions',
     })
   }
 }

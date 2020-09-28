@@ -26,7 +26,7 @@ module.exports = function (req, res, next) {
     const user = await User.findByPk(userId)
 
     if (!user) {
-      return res.status(404).json({ error: 'user not found' })
+      return res.status(422).json({ error: 'you most be login' })
     }
 
     req.userId = user.id

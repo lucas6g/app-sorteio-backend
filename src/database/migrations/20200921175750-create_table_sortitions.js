@@ -40,11 +40,17 @@ module.exports = {
         allowNull: true,
       },
 
+      description: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+
       number_participants: {
         type: Sequelize.INTEGER,
         allowNull: true,
         defaultValue: 0,
       },
+
       award_name: {
         type: Sequelize.STRING,
         allowNull: false,

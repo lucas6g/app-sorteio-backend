@@ -7,6 +7,7 @@ class Sortition extends Model {
     super.init(
       {
         //passar os dados da tabela para o model referenciar
+        user_id: DataTypes.INTEGER,
         title: DataTypes.STRING,
         sortition_date: DataTypes.DATE,
         rules: DataTypes.STRING,
@@ -15,6 +16,7 @@ class Sortition extends Model {
         number_participants: DataTypes.INTEGER,
         award_name: DataTypes.STRING,
         award_img: DataTypes.STRING,
+        description: DataTypes.STRING,
       },
       {
         sequelize: connection, //passar a conexao com o banco de dados
@@ -23,11 +25,10 @@ class Sortition extends Model {
   }
   static associate(models) {
     //devo dar um nome para cada relacionamento
-    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'creator' }) //passar a chave estrangeira da tabela de sorteio
+    this.belongsTo(models.User, { as: 'creator', foreignKey: 'user_id' }) //passar a chave estrangeira da tabela de sorteio
+
     this.belongsToMany(models.User, {
-      foreignKey: 'sortition_id',
       through: 'users_sortitions',
-      as: 'participants',
     })
   }
 }
