@@ -3,7 +3,7 @@ const User = require('../models/User')
 require('dotenv').config()
 
 //midleware que serve para dar acesso as rotas da minha aplicacao
-//somente aos usurios que tiverem token
+//somente aos usurios que tiverem autenticados
 
 module.exports = function (req, res, next) {
   const { authorization } = req.headers

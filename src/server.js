@@ -11,8 +11,8 @@ require('./database')
 app.use(cors())
 app.use(express.json())
 //para usar as rotas basta passar o midleware
-app.use(authRoute)
 app.use(routes)
+app.use(authRoute)
 app.use(sortitionRoute)
 
 app.listen(3333, () => {

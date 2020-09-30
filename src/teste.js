@@ -15,6 +15,9 @@ if (dataPasado < presente) {
   console.log('essa data é invalida')
 }
 
+if (10 !== 3) {
+  console.log('é diferente')
+}
 /*
   datas no js
 
