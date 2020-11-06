@@ -43,10 +43,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      confirmation_token_expires: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
 
       token_winning_participant: {
         type: Sequelize.STRING,

@@ -34,6 +34,11 @@ module.exports = {
         allowNull: false,
         defaultValue: false,
       },
+      status: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'Não Realizado',
+      },
 
       user_name_winning_participant: {
         type: Sequelize.STRING,

@@ -15,7 +15,6 @@ class User extends Model {
         img_profile: DataTypes.STRING,
         is_verified: DataTypes.BOOLEAN,
         confirmation_token: DataTypes.INTEGER,
-        confirmation_token_expires: DataTypes.DATE,
         token_winning_participant: DataTypes.STRING,
         token_winning_participant_expires: DataTypes.DATE,
         reset_password_token: DataTypes.STRING,

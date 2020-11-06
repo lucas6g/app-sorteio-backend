@@ -6,7 +6,7 @@ module.exports = async function (userEmail, token) {
 
   const response = await transporter.sendMail({
     to: userEmail,
-    from: `Dream Draw ${process.env.SMTP_EMAIL}`,
+    from: `Sorteio Validado ${process.env.SMTP_EMAIL}`,
     subject: 'Comfirmação da conta',
     html: `
     Seu codigo de confirmação é 

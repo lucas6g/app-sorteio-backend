@@ -10,21 +10,13 @@ require('dotenv').config()
 
 module.exports = {
   async signup(req, res) {
-    const { user_name, email, password, confirm_password } = req.body
-
-    if (!email || !password || !user_name)
-      return res
-        .status(401)
-        .json({ error: 'The email and password fields are mandatory' })
-
-    if (password !== confirm_password)
-      return res.status(400).json({ error: 'invalid confirm password' })
+    const { user_name, email, password } = req.body
 
     if (await User.findOne({ attributes: ['user_name'], where: { user_name } }))
-      return res.status(401).json({ error: 'user name already exists' })
+      return res.status(422).json({error:{message:'Esse nome de usuario já está em uso',path:'userName'}})
 
-    if (await User.findOne({ attributes: ['email'], where: { email } }))
-      return res.status(401).json({ error: 'this email already exists' })
+    if (await User.findOne({ attributes: ['email'], where: { email }}))
+      return res.status(422).json({error:{message:'Esse email já está em uso',path:'email'}})
 
     const user = {
       user_name,
@@ -36,51 +28,45 @@ module.exports = {
     /*
              send confirmation token  to user email
         */
-    const now = new Date()
-    now.setMinutes(now.getMinutes() + 5)
-    user.confirmation_token_expires = now
-
     const insertedUser = await User.create(user)
 
     sendConfirmationToken(insertedUser.email, insertedUser.confirmation_token)
 
     const token = jwt.sign(
-      { userId: insertedUser.id },
+      { userId: insertedUser.id }, //info que identifica o usuario
       process.env.JWT_SECRET_KEY
     )
+     insertedUser.password = null
+     insertedUser.confirmation_token = null 
 
     if (token) {
       return res
         .status(201)
-        .json({ token, email: insertedUser.email, user_id: insertedUser.id })
+        .json({ token, insertedUser})
     }
   },
 
   async acountConfirmation(req, res) {
     const { email, confirmation_token } = req.body
-
     if (!confirmation_token) {
-      return res.status(422).json({ error: 'invalid token' })
+      return res.status(422).json({ error:{message:'Codigo invalido.'} })
     }
 
     const user = await User.findOne({
-      attributes: ['confirmation_token', 'confirmation_token_expires'],
+      attributes: ['confirmation_token'],
       where: { email },
     })
 
     if (!user) {
       return res.status(404).json({ error: 'user not found' })
     }
-    if (user.confirmation_token !== confirmation_token) {
-      return res.status(422).json({ error: 'invalid token' })
+
+      
+    if (user.confirmation_token != confirmation_token) {
+      return res.status(422).json({error:{message:'Codigo invalido.'}})
     }
 
-    const now = new Date()
-
-    if (now > user.confirmation_token_expires) {
-      return res.status(400).json({ error: 'token expired generate new one' })
-    }
-
+   
     await User.update(
       { is_verified: true },
       {
@@ -93,64 +79,33 @@ module.exports = {
 
   async signin(req, res) {
     const { email, password } = req.body
-
-    if (!email || !password)
-      return res
-        .status(422)
-        .json({ erro: 'you need provide email and password' })
-
     const user = await User.findOne({
       attributes: ['id', 'email', 'password', 'is_verified'],
       where: { email },
     })
 
     if (!user)
-      return res.status(422).json({ erro: 'invalid email or password' })
-
+      return res.status(422).json({error:{message:'email ou senha invalidos.'}})
+    
     if (!user.is_verified)
-      return res.status(422).json({ erro: 'account without verification' })
+      return res.status(422).json({error:{message:'Conta sem verificação.'}})
 
     try {
       const isPassword = await bcrypt.compare(password, user.password)
 
       if (!isPassword)
-        return res.status(422).json({ erro: 'invalid email or password' })
-
+        return res.status(422).json({error:{message:'email ou senha invalidos.'}})
+      
+      user.password = null
       //creating a token whit the user information
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET_KEY)
-      return res.status(200).json({ token, user_id: user.id })
+      return res.status(200).json({ token, user })
     } catch (error) {
-      return res.status(422).json({ erro: 'invalid email or password' })
+      return res.status(422).json({error:{message:'email ou senha invalidos.'}})
     }
   },
 
-  async reSendConfirmationToken(req, res) {
-    const { email } = req.body
-
-    const user = await User.findOne({ where: { email } })
-
-    if (!user || user.is_verified) {
-      return res.status(422).send()
-    } else {
-      const token = generateToken()
-
-      const now = new Date()
-      now.setMinutes(now.getMinutes() + 5)
-
-      await User.update(
-        {
-          confirmation_token: token,
-          confirmation_token_expires: now,
-        },
-        {
-          where: { email },
-        }
-      )
-
-      sendConfirmationToken(email, token)
-      return res.send()
-    }
-  },
+  
 
   //reset passwords ------------
 
